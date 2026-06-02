@@ -23,7 +23,7 @@ public class StudentController {
 
     @GetMapping
     public ResponseEntity<Object> getStudents() {
-        return  ResponseEntity.ok(studentService.getAll());
+        throw new RuntimeException("Test failure - intentional error");
     }
 
     @GetMapping(value = "/{id}")
@@ -32,7 +32,7 @@ public class StudentController {
         if (studentOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return  ResponseEntity.ok(studentOptional.get());
+        return ResponseEntity.ok(studentOptional.get());
     }
 
     @PostMapping
@@ -43,7 +43,6 @@ public class StudentController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(savedStudent.getId()).toUri();
         return ResponseEntity.created(location).build();
@@ -55,10 +54,13 @@ public class StudentController {
         if (studentOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-
-        student.setId(id);
-        this.studentService.addStudent(student);
-        return ResponseEntity.ok(student);
+        try {
+            student.setId(id);
+            this.studentService.updateStudent(student);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(value = "/{id}")
@@ -68,7 +70,6 @@ public class StudentController {
             return ResponseEntity.notFound().build();
         }
         this.studentService.removeStudentById(id);
-
         return ResponseEntity.ok().build();
     }
 }
