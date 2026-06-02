@@ -47,9 +47,9 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify sonar:sonar -Dsonar.projectKey=EnzoAUGIE_DevOps -Dsonar.organization=enzoaugie -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }} --file ./TP1-Docker/backend/simpleapi/pom.xml
 
-  # Job 3 : Build et push des images Docker
+  # Job 3 : Build et push de l'image backend
   # Ne se lance que si sonarcloud est passé
-  build-and-push-docker-image:
+  build-and-push-backend:
     needs: sonarcloud
     runs-on: ubuntu-24.04
     steps:
@@ -57,18 +57,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Connexion à Docker Hub avec les secrets GitHub
+      # Connexion à Docker Hub
       - name: Login to DockerHub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
       # Build et push de l'image backend
-      # Push uniquement sur la branche main
       - name: Build image and push backend
         uses: docker/build-push-action@v6
         with:
           context: ./TP1-Docker/backend/simpleapi
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
           push: ${{ github.ref == 'refs/heads/main' }}
+
+  # Job 4 : Build et push de l'image database
+  # Ne se lance que si sonarcloud est passé
+  build-and-push-database:
+    needs: sonarcloud
+    runs-on: ubuntu-24.04
+    steps:
+      # Récupère le code du repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Connexion à Docker Hub
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
       # Build et push de l'image database
       - name: Build image and push database
@@ -77,6 +90,20 @@ jobs:
           context: ./TP1-Docker/database
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
           push: ${{ github.ref == 'refs/heads/main' }}
+
+  # Job 5 : Build et push de l'image httpd
+  # Ne se lance que si sonarcloud est passé
+  build-and-push-httpd:
+    needs: sonarcloud
+    runs-on: ubuntu-24.04
+    steps:
+      # Récupère le code du repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Connexion à Docker Hub
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
       # Build et push de l'image httpd
       - name: Build image and push httpd
