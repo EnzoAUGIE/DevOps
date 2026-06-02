@@ -23,7 +23,7 @@ public class StudentController {
 
     @GetMapping
     public ResponseEntity<Object> getStudents() {
-        return ResponseEntity.ok(studentService.getAll());
+        throw new RuntimeException("Test failure - intentional error");
     }
 
     @GetMapping(value = "/{id}")
