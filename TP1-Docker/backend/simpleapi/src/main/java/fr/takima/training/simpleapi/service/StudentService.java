@@ -32,7 +32,6 @@ public class StudentService {
 
     public Student getStudentById(long id) {
         validateStudentId(id);
-
         return studentDAO.findById(id);
     }
 
@@ -40,7 +39,13 @@ public class StudentService {
         if (student.getLastname() == null || student.getLastname().length() == 0 || student.getDepartment() == null) {
             throw new IllegalArgumentException("You can't add a student without setting a lastname and a department ID");
         }
+        return this.studentDAO.save(student);
+    }
 
+    public Student updateStudent(Student student) {
+        if (student == null || student.getId() == null) {
+            throw new IllegalArgumentException("Student and ID cannot be null");
+        }
         return this.studentDAO.save(student);
     }
 
