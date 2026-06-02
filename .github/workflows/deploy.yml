@@ -1,7 +1,6 @@
 name: Deploy Docker Images
 
 on:
-  # Se déclenche uniquement si le workflow "Test Backend" est passé
   workflow_run:
     workflows: ["Test Backend"]
     types:
@@ -10,8 +9,7 @@ on:
       - main
 
 jobs:
-  # Job 1 : Build et push de l'image backend
-  # Ne se lance que si le workflow test est passé
+  # Build et push de l'image backend
   build-and-push-backend:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
@@ -26,10 +24,13 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1-Docker/backend/simpleapi
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
+          # Tag latest + tag avec le numéro de commit
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:${{ github.sha }}
           push: true
 
-  # Job 2 : Build et push de l'image database
+  # Build et push de l'image database
   build-and-push-database:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
@@ -44,10 +45,12 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1-Docker/database
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:${{ github.sha }}
           push: true
 
-  # Job 3 : Build et push de l'image httpd
+  # Build et push de l'image httpd
   build-and-push-httpd:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
@@ -62,5 +65,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1-Docker/httpd
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:${{ github.sha }}
           push: true
