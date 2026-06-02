@@ -1,35 +1,52 @@
 name: CI devops 2025
 on:
+  # Lance le pipeline sur la branche main et les pull requests
   push:
     branches:
       - main
   pull_request:
 
 jobs:
+  # Job 1 : Build et test du backend
   test-backend:
     runs-on: ubuntu-24.04
     steps:
+      # Récupère le code du repo
       - uses: actions/checkout@v4
 
+      # Configure Java 21 avec la distribution Temurin
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
+      # Lance les tests Maven (unit tests + integration tests)
       - name: Build and test with Maven
         run: mvn clean verify --file ./TP1-Docker/backend/simpleapi/pom.xml
 
+      # Analyse de la qualité du code avec SonarCloud
+      - name: SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify sonar:sonar -Dsonar.projectKey=EnzoAUGIE_DevOps -Dsonar.organization=enzoaugie -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }} --file ./TP1-Docker/backend/simpleapi/pom.xml
+
+  # Job 2 : Build et push des images Docker
+  # Ce job ne se lance que si test-backend est passé
   build-and-push-docker-image:
     needs: test-backend
     runs-on: ubuntu-24.04
     steps:
+      # Récupère le code du repo
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Connexion à Docker Hub avec les secrets GitHub
       - name: Login to DockerHub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
+      # Build et push de l'image backend
+      # Push uniquement sur la branche main
       - name: Build image and push backend
         uses: docker/build-push-action@v6
         with:
@@ -37,6 +54,7 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
           push: ${{ github.ref == 'refs/heads/main' }}
 
+      # Build et push de l'image database
       - name: Build image and push database
         uses: docker/build-push-action@v6
         with:
@@ -44,6 +62,7 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
           push: ${{ github.ref == 'refs/heads/main' }}
 
+      # Build et push de l'image httpd
       - name: Build image and push httpd
         uses: docker/build-push-action@v6
         with:

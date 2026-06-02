@@ -1,4 +1,4 @@
-# TP1 Docker - Réponses aux questions
+# TP1&2 Docker - Réponses aux questions
 
 ## Q1-1 For which reason is it better to run the container with a flag -e to give the environment variables rather than put them directly in the Dockerfile?
 
@@ -175,3 +175,24 @@ Mettre les images sur Docker Hub permet de :
 3. Versionner les images (tag 1.0, 2.0...) pour revenir à une version précédente
 4. Avoir une sauvegarde des images en cas de perte de la machine locale
 5. Permettre à d'autres de réutiliser nos images comme base pour leurs projets
+
+## Q2-1 What are testcontainers?
+
+Les testcontainers sont des bibliothèques Java qui permettent de lancer des containers Docker pendant les tests. Dans notre cas, on utilise un container PostgreSQL qui se lance automatiquement pendant les tests 
+d'intégration, ce qui permet de tester les requêtes SQL sans avoir besoin d'une vraie base de données installée sur la machine.
+
+## Q2-2 For what purpose do we need to use secured variables?
+
+On utilise des variables sécurisées (secrets) pour ne jamais exposer des informations sensibles (comme les credentials Docker Hub) dans le code source versionné sur GitHub. Si on mettait le mot de passe
+directement dans le fichier main.yml, n'importe qui pourrait le voir sur le repo public et accéder à notre compte Docker Hub.
+
+## Q2-3 Why did we put needs: test-backend on this job?
+
+On utilise "needs: test-backend" pour s'assurer que le job de build et push des images Docker ne se lance que si les tests sont passés. Sans ce paramètre, les deux jobs se lanceraient en parallèle
+et on pourrait publier une image Docker dont le code ne compile pas ou dont les tests échouent. C'est une bonne pratique : on ne livre jamais du code non testé.
+
+## Q2_4 For what purpose do we need to push docker images?
+
+On pousse les images Docker sur Docker Hub pour les rendre disponibles sur n'importe quelle machine sans avoir besoin de rebuilder. Cela permet à d'autres membres de l'équipe de les utiliser directement avec 
+"docker pull", et de déployer l'application sur un serveur de production sans avoir besoin du code source ni des outils de build.
+
