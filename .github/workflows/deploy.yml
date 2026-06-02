@@ -1,0 +1,66 @@
+name: Deploy Docker Images
+
+on:
+  # Se déclenche uniquement si le workflow "Test Backend" est passé
+  workflow_run:
+    workflows: ["Test Backend"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  # Job 1 : Build et push de l'image backend
+  # Ne se lance que si le workflow test est passé
+  build-and-push-backend:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Build image and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP1-Docker/backend/simpleapi
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
+          push: true
+
+  # Job 2 : Build et push de l'image database
+  build-and-push-database:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Build image and push database
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP1-Docker/database
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
+          push: true
+
+  # Job 3 : Build et push de l'image httpd
+  build-and-push-httpd:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Build image and push httpd
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP1-Docker/httpd
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
+          push: true
