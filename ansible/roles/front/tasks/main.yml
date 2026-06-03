@@ -1,0 +1,12 @@
+---
+# Lancer le container frontend
+- name: Launch front
+  community.docker.docker_container:
+    name: front
+    image: enzoaugie/tp-devops-front:latest
+    networks:
+      - name: front-network
+    state: started
+    recreate: true
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python
