@@ -24,10 +24,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1-Docker/backend/simpleapi
-          # Tag latest + tag avec le numéro de commit
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
           push: true
 
   # Build et push de l'image database
@@ -45,9 +42,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1-Docker/database
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
           push: true
 
   # Build et push de l'image httpd
@@ -65,7 +60,31 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1-Docker/httpd
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
           push: true
+
+  # Déploiement Ansible
+  deploy:
+    needs: [build-and-push-backend, build-and-push-database, build-and-push-httpd]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa_takima
+          chmod 600 ~/.ssh/id_rsa_takima
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Run Ansible playbook
+        run: |
+          ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: False
