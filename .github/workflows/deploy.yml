@@ -7,13 +7,11 @@ on:
       - completed
     branches:
       - main
-  # Déclenchement manuel
-  workflow_dispatch:
 
 jobs:
   # Build et push de l'image backend
   build-and-push-backend:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -31,7 +29,7 @@ jobs:
 
   # Build et push de l'image database
   build-and-push-database:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -49,7 +47,7 @@ jobs:
 
   # Build et push de l'image httpd
   build-and-push-httpd:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -64,28 +62,3 @@ jobs:
           context: ./TP1-Docker/httpd
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
           push: true
-
-  # Déploiement Ansible
-  deploy:
-    needs: [build-and-push-backend, build-and-push-database, build-and-push-httpd]
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Ansible
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ansible
-
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa_takima
-          chmod 600 ~/.ssh/id_rsa_takima
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Run Ansible playbook
-        run: ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: False
