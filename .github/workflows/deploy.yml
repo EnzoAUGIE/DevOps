@@ -24,10 +24,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1-Docker/backend/simpleapi
-          # Tag latest + tag avec le numéro de commit
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
           push: true
 
   # Build et push de l'image database
@@ -45,9 +42,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1-Docker/database
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
           push: true
 
   # Build et push de l'image httpd
@@ -65,7 +60,5 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1-Docker/httpd
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
           push: true
