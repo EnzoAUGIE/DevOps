@@ -1,0 +1,17 @@
+---
+# Lancer le container Spring Boot
+- name: Launch app
+  community.docker.docker_container:
+    name: backend
+    image: enzoaugie/tp-devops-backend:latest
+    networks:
+      - name: front-network
+      - name: back-network
+    env:
+      POSTGRES_DB: "{{ postgres_db }}"
+      POSTGRES_USER: "{{ postgres_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
+    state: started
+    recreate: true
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python

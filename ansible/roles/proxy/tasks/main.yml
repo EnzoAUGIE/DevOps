@@ -1,0 +1,14 @@
+---
+# Lancer le container Apache httpd
+- name: Launch proxy
+  community.docker.docker_container:
+    name: httpd
+    image: enzoaugie/tp-devops-httpd:latest
+    networks:
+      - name: front-network
+    ports:
+      - "80:80"
+    state: started
+    recreate: true
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python
