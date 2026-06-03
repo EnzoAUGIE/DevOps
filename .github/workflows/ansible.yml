@@ -1,14 +1,12 @@
 name: Deploy with Ansible
 
 on:
-  # Se déclenche automatiquement après "Deploy Docker Images" sur main
   workflow_run:
     workflows: ["Deploy Docker Images"]
     types:
       - completed
     branches:
       - main
-  # Déclenchement manuel possible aussi
   workflow_dispatch:
 
 jobs:
@@ -32,6 +30,6 @@ jobs:
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Run Ansible playbook
-        run: ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml
+        run: ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml --private-key=~/.ssh/id_rsa_takima
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
