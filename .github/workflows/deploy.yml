@@ -7,11 +7,13 @@ on:
       - completed
     branches:
       - main
+  # Déclenchement manuel
+  workflow_dispatch:
 
 jobs:
   # Build et push de l'image backend
   build-and-push-backend:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -29,7 +31,7 @@ jobs:
 
   # Build et push de l'image database
   build-and-push-database:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -47,7 +49,7 @@ jobs:
 
   # Build et push de l'image httpd
   build-and-push-httpd:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -84,7 +86,6 @@ jobs:
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Run Ansible playbook
-        run: |
-          ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml
+        run: ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
