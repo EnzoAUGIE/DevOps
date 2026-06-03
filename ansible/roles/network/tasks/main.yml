@@ -1,0 +1,14 @@
+---
+# Créer le réseau front-network
+- name: Create front-network
+  community.docker.docker_network:
+    name: front-network
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python
+
+# Créer le réseau back-network
+- name: Create back-network
+  community.docker.docker_network:
+    name: back-network
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python
