@@ -25,11 +25,13 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa_takima
+          printf '%s' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa_takima
           chmod 600 ~/.ssh/id_rsa_takima
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          # Vérifier que la clé est bien écrite
+          wc -c ~/.ssh/id_rsa_takima
 
       - name: Run Ansible playbook
-        run: ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml --private-key=~/.ssh/id_rsa_takima
+        run: ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml --private-key=~/.ssh/id_rsa_takima -u admin
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
