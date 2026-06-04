@@ -8,5 +8,8 @@
       - name: front-network
     state: started
     recreate: true
+    # pull: true
+    # Décommenter pour forcer le téléchargement de la dernière image depuis Docker Hub
+    # à chaque déploiement, évitant ainsi de supprimer manuellement l'ancienne image
   vars:
     ansible_python_interpreter: /opt/docker_venv/bin/python
